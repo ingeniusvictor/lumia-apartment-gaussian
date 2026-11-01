@@ -12,20 +12,34 @@ const target = resolve(root, 'public/lumia-ap03-collision.glb');
 
 const positions = [];
 const indices = [];
+const WALK_CAPSULE_RADIUS = 0.2; // matches WalkController.capsuleRadius
+const WALL_THICKNESS = 0.60;      // larger than 2 * capsule radius
 const shapes = [
-    // Name, center XYZ, width/height/depth. Approximate AP-02 demo scene, meters.
-    ['floor',          0,    -0.06, -0.90, 6.82, 0.12, 6.14],
-    ['left-wall',     -3.40,  1.55, -0.90, 0.12, 3.10, 6.14],
-    ['right-wall',     3.40,  1.55, -0.90, 0.12, 3.10, 6.14],
-    ['rear-wall',      0,     1.55, -3.98, 6.82, 3.10, 0.12],
-    // Deliberately invisible physical barrier at the open presentation-facing edge.
-    ['front-barrier',  0,     1.15,  2.16, 6.82, 2.30, 0.10],
-    // First-pass furniture proxies. These are not a precision reconstruction.
+    // Visual AP-02 room (world coordinates): x [-3.459,3.459],
+    // y [-0.013,3.163], z [-4.058,2.262].
+    // Colliders extend outward; their inner faces align to the visual walls.
+    // Overlapping corners and tall, thick barriers prevent escape.
+    ['floor',          0,    -0.30, -0.90, 8.40, 0.60, 7.80],
+    ['left-wall',     -3.76,  1.65, -0.90, WALL_THICKNESS, 3.90, 7.80],
+    ['right-wall',     3.76,  1.65, -0.90, WALL_THICKNESS, 3.90, 7.80],
+    ['rear-wall',      0,     1.65, -4.36, 8.40, 3.90, WALL_THICKNESS],
+    ['front-barrier',  0,     1.65,  2.56, 8.40, 3.90, WALL_THICKNESS],
     ['sofa',           0,     0.43, -2.70, 2.45, 0.86, 0.92],
     ['coffee-table',   0,     0.27, -1.13, 1.62, 0.54, 0.86],
     ['plant',         -2.30,  0.45, -2.91, 0.56, 0.90, 0.56],
     ['lamp',           2.36,  0.56, -2.85, 0.45, 1.12, 0.45]
 ];
+
+// A capsule must not overlap both sides of a wall at once.
+for (const [name, , , , sx, sy, sz] of shapes) {
+    if (name.endsWith('-wall') || name === 'front-barrier') {
+        const thickness = name === 'left-wall' || name === 'right-wall' ? sx : sz;
+        if (thickness <= 2 * WALK_CAPSULE_RADIUS) {
+            throw new Error('AP-03 wall too thin for collision: ' + name);
+        }
+        if (sy < 3.4) throw new Error('AP-03 wall too low: ' + name);
+    }
+}
 
 // Write world-coordinate vertices directly. MeshCollision.fromGlb reads mesh buffers
 // and does NOT apply a transform hierarchy when extracting collision triangles.
