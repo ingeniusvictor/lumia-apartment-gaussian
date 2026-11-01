@@ -1,6 +1,6 @@
 # LUMIA AP-03 — Navegación física y colisiones (prototipo)
 
-**Estado:** implementación preliminar en la rama `feat/ap03-walk-collision-prototype`. El generador GLB fue contrastado con un lector glTF local, pero **aún no está validado en el navegador del usuario**.
+**Estado:** prototipo validado funcionalmente por el usuario en Chrome/Windows el 2026-11-01, después del refuerzo de los muros de colisión (commit `6835b6c`). Pendiente una batería automatizada de regresión y pruebas con el apartamento definitivo.
 
 ## Qué contiene
 
@@ -56,3 +56,14 @@ Se esperan tres respuestas HTTP 200. HTTP 200 **no garantiza** que la física es
 - AP-02 continúa iniciando con `lumia/scripts/start-ap02.ps1` al volver a su rama.
 
 **Fuera de alcance AP-03 inicial:** puertas animadas, avatar de LUMIA, modelo real del apartamento, escaneo fotográfico o precisión de colisiones del mobiliario. Se abordarán solo después de validar esta prueba.
+
+## Evidencia de validación manual (2026-11-01)
+
+- El usuario confirmó que el mueble no se atraviesa, pero detectó que las paredes exteriores sí se atravesaban en la versión inicial.
+- Se aumentó el espesor de muros a 0,60 m, se reforzaron los límites y el suelo y se solaparon las esquinas en `6835b6c`.
+- Tras actualizar el generador y reiniciar AP-03, el usuario respondió **«FUNCIONA»**. Se registra como **PASS reportado por el usuario para la corrección de colisiones**; no se atribuye una auditoría exhaustiva de cada superficie ni una prueba automatizada.
+- Conservamos `main` y `research/ap02-gaussian-baseline` sin incorporar estos cambios experimentales.
+
+## Próxima etapa sugerida: AP-04
+
+Puerta interactiva independiente de la geometría Gaussian, con estado de apertura/cierre, animación y actualización de barrera de navegación. Preparar posteriormente las rutas del avatar LUMIA. No integrar aún el GLB final ni modificar los archivos de cuerpo/rostro originales.
